@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanoi Explorer AI - Trợ Lý Du Lịch & Ẩm Thực Thủ Đô</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230284c7'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='white' stroke-width='4'/%3E%3Cpolygon points='32,18 38,32 32,46 26,32' fill='white'/%3E%3C/svg%3E">
+
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Application Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=5">
+</head>
+<body>
+    <div class="app-layout" id="app-layout">
+        <!-- SIDEBAR BÊN TRÁI -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="cyber-avatar">
+                    <i class="fa-solid fa-compass"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Hanoi Explorer <span class="badge-ai">AI</span></h1>
+                    <p class="status-online"><i class="fa-solid fa-circle-check"></i> Trợ lý du lịch thông minh</p>
+                </div>
+            </div>
+
+            <!-- Nút Tạo Trò Chuyện Mới -->
+            <button id="new-chat-btn" class="new-chat-btn">
+                <i class="fa-solid fa-plus"></i>
+                <span>Trò chuyện mới</span>
+            </button>
+
+            <!-- Quản lý Lịch sử Trò chuyện (3 ngày) -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> LỊCH SỬ TRÒ CHUYỆN</h3>
+                    <button type="button" id="clear-history-trigger" class="section-clear-btn" onclick="openConfirmModal()" title="Xóa toàn bộ lịch sử">
+                        <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                </div>
+                <div class="history-list" id="history-list">
+                    <!-- Tải động từ localStorage -->
+                </div>
+            </div>
+
+            <!-- Footer Sidebar -->
+            <div class="sidebar-footer">
+                <div class="user-status-card">
+                    <div class="status-indicator">
+                        <span class="online-dot"></span>
+                        <span class="model-badge"><i class="fa-solid fa-sparkles"></i> Gemini AI Active</span>
+                    </div>
+                    <div class="creator-credit">
+                        <span class="creator-label">Phát triển bởi:</span>
+                        <span class="creator-name">Phạm Ngọc Huân</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- VÙNG NỘI DUNG CHÍNH (CHAT VIEWPORT) -->
+        <main class="main-content-area">
+            <!-- TOPBAR ĐIỀU KHIỂN & BỘ LỌC DANH MỤC -->
+            <header class="chat-topbar">
+                <div class="topbar-row-primary">
+                    <div class="topbar-left">
+                        <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Mở lịch sử trò chuyện">
+                            <i class="fa-solid fa-bars"></i>
+                        </button>
+                        <div class="chat-title">
+                            <h2><i class="fa-solid fa-compass"></i> Hanoi Explorer AI</h2>
+                            <span class="sub-title">Trợ lý du lịch, ẩm thực và văn hóa thủ đô Hà Nội</span>
+                        </div>
+                    </div>
+
+                    <div class="district-filter-wrap">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <select id="district-select" onchange="handleDistrictFilterChange(this.value)">
+                            <option value="all">📍 Toàn bộ 12 Quận Hà Nội</option>
+                            <option value="Hoàn Kiếm">Quận Hoàn Kiếm (Phố Cổ, Bờ Hồ)</option>
+                            <option value="Ba Đình">Quận Ba Đình (Lăng Bác, Hoàng Thành)</option>
+                            <option value="Tây Hồ">Quận Tây Hồ (Hồ Tây, Phủ Tây Hồ)</option>
+                            <option value="Cầu Giấy">Quận Cầu Giấy (Tô Hiệu, Trung Hòa)</option>
+                            <option value="Đống Đa">Quận Đống Đa (Văn Miếu, Hoàng Cầu)</option>
+                            <option value="Hai Bà Trưng">Quận Hai Bà Trưng (Lò Đúc, Bách Khoa)</option>
+                            <option value="Thanh Xuân">Quận Thanh Xuân (Royal City, Nguyễn Trãi)</option>
+                            <option value="Hà Đông">Quận Hà Đông (Vạn Phúc, Mỗ Lao)</option>
+                            <option value="Nam Từ Liêm">Quận Nam Từ Liêm (Mỹ Đình, Phùng Khoang)</option>
+                            <option value="Bắc Từ Liêm">Quận Bắc Từ Liêm (Công viên Hòa Bình)</option>
+                            <option value="Hoàng Mai">Quận Hoàng Mai (Linh Đàm, Yên Sở)</option>
+                            <option value="Long Biên">Quận Long Biên (Cầu Long Biên)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Dòng lọc nhanh Danh mục (Category Pills) -->
+                <div class="category-pills" id="category-pills">
+                    <button class="pill-btn active" data-cat="all"><i class="fa-solid fa-globe"></i> Tất cả</button>
+                    <button class="pill-btn" data-cat="an-uong"><i class="fa-solid fa-utensils"></i> Ẩm thực</button>
+                    <button class="pill-btn" data-cat="ca-phe"><i class="fa-solid fa-mug-saucer"></i> Cà phê</button>
+                    <button class="pill-btn" data-cat="di-tich"><i class="fa-solid fa-landmark"></i> Di tích</button>
+                    <button class="pill-btn" data-cat="ngoai-troi"><i class="fa-solid fa-water"></i> Hồ & Dã ngoại</button>
+                    <button class="pill-btn" data-cat="giai-tri"><i class="fa-solid fa-gamepad"></i> Giải trí</button>
+                    <button class="pill-btn" data-cat="tam-linh"><i class="fa-solid fa-place-of-worship"></i> Tâm linh</button>
+                    <button class="pill-btn" data-cat="the-thao"><i class="fa-solid fa-person-swimming"></i> Thể thao</button>
+                </div>
+            </header>
+
+            <!-- VÙNG TIN NHẮN CHAT VÀ THẺ ĐỊA ĐIỂM -->
+            <section class="chat-viewport" id="chat-viewport">
+                <!-- Vùng hiển thị tin nhắn -->
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Tin nhắn hiển thị tại đây -->
+                </div>
+
+                <!-- Nút cuộn xuống cuối tin nhắn -->
+                <button id="scroll-bottom-btn" class="scroll-bottom-btn" title="Cuộn xuống cuối">
+                    <i class="fa-solid fa-arrow-down"></i>
+                </button>
+
+                <!-- Khung nhập liệu câu hỏi -->
+                <div class="chat-input-container">
+                    <div class="input-wrapper">
+                        <div class="input-prefix-icon">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="user-input" 
+                            maxlength="500"
+                            placeholder="Nhập câu hỏi hoặc địa điểm bạn muốn tìm kiếm..." 
+                            autocomplete="off"
+                        >
+                        <button id="send-btn" title="Gửi tin nhắn (Enter)">
+                            <span>Gửi</span>
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobile-sidebar-overlay" class="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Script Application -->
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=3"></script>
+</body>
+</html>
